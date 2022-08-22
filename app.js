@@ -1,14 +1,11 @@
 const express = require('express')
+const morgan = require('morgan')
 const app = express()
 
 /*middleware : fonction qui va être lue au moment où il y a une requête,
 quelque soit cette requête, va s'exécuter avant tout le reste */
 
-/*fonction de debug, affiche l'url en console */
-app.use((req, res, next) => {
-    console.log('URL :'  + req.url)
-    next()
-})
+app.use(morgan('dev'))
 
 app.get('/api', (req, res) => {
     res.send('Root API');
