@@ -5,21 +5,39 @@ const app = express()
 /*middleware : fonction qui va être lue au moment où il y a une requête,
 quelque soit cette requête, va s'exécuter avant tout le reste */
 
+const members = [
+    {
+        id: 1,
+        name: 'Fred'
+    },
+    {
+        id: 2,
+        name: 'Philippine'
+    },
+    {
+        id: 3,
+        name: 'Vero'
+    },
+]
+
+
 app.use(morgan('dev'))
 
-app.get('/api', (req, res) => {
-    res.send('Root API');
+// récupération via :id
+app.get('/api/v1/members/:id', (req, res) => {
+    res.send(members[(req.params.id) - 1]['name'])
 })
 
-app.get('/api/v1', (req, res) => {
-    res.send("API version 1");
-})
-
-
-/* paramètres des urls : */
-/* :<param> */
-app.get('/api/v1/books/:id/:id2', (req, res) => {
-    res.send(req.params);
+// récupération de tous les membres, utilisation de query -> correspond à url ?<data>
+app.get('/api/v1/members', (req, res) => {
+    if (req.query.max !== undefined && req.query.max > 0) {
+        res.send(members.slice(0, req.query.max))
+        // slice renvoie une portion de l'array, entre indice et indice -1
+    }
+    /*  arr.slice()
+        arr.slice(début)
+           arr.slice(début, fin)*/
+    res.send(members)
 })
 
 
