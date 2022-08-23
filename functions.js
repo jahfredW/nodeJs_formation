@@ -14,7 +14,7 @@ exports.error = (message) => {
 
 exports.getIndex = (id, obj) => {
     for (let index = 0; index < obj.length; index++) {
-        if (obj[index].id === id) {
+        if (obj[index].id == id) {
             return index;
         }
     }

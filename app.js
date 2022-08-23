@@ -47,6 +47,19 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 
+app.delete('/api/v1/members/:id', (req, res) => {
+    let index = getIndex(req.params.id, members);
+
+    if (typeof (index) == 'string') {
+        console.log('ici');
+        res.json(error(index));
+    } else {
+        members.splice(index, 1);
+        res.json(success(members));
+
+    }
+
+})
 
 
 // récupération via :id
@@ -123,12 +136,8 @@ app.put('/api/v1/members/:id', (req, res) => {
                 members[index].name = req.body.name;
                 res.json(success(true))
             }
-
-
         }
     }
-
-
 
 })
 
@@ -151,7 +160,7 @@ app.post('/api/v1/members', (req, res) => {
         } else {
             let member =
                 {
-                    id: members.length + 1,
+                    id: createID(),
                     name: req.body.name
                 }
 
@@ -166,6 +175,8 @@ app.post('/api/v1/members', (req, res) => {
 
 })
 
+
+
 app.listen(8080, () => console.log('Started on port 8080')
 );
 
@@ -176,4 +187,8 @@ for (let letter of test.split("")) {
     process.stdout.write(letter);
 }
 */
+
+function createID() {
+    return members[members.length - 1].id + 1
+}
 
