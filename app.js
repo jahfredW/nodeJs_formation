@@ -41,141 +41,155 @@ const publication = [
     },
 ]
 
+let MembersRouter = express.Router()
+let PublicationsRouter = express.Router()
+
 
 app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+MembersRouter.route('/:id')
 
-app.delete('/api/v1/members/:id', (req, res) => {
-    let index = getIndex(req.params.id, members);
+    // Supprime un membre avec son id
+    .delete((req, res) => {
+        let index = getIndex(req.params.id, members);
 
-    if (typeof (index) == 'string') {
-        console.log('ici');
-        res.json(error(index));
-    } else {
-        members.splice(index, 1);
-        res.json(success(members));
-
-    }
-
-})
-
-
-// récupération via :id
-app.get('/api/v1/members/:id', (req, res) => {
-
-    let index = getIndex(req.params.id, members);
-
-    if (typeof(index) == 'string') {
-        res.json(error(index));
-    } else {
-        res.json(success(members[index].name));
-    }
-})
-
-app.get('/api/v1/publication/:id', (req, res) => {
-    let index = getIndex(req.params.id, members)
-
-    if (typeof(index) == 'string') {
-        res.json(error(index));
-    } else {
-        res.json(success(publication[index].title));
-    }
-})
-
-app.get('/api/v1/publication', (req, res)=> {
-    res.json(success(publication));
-})
-
-
-
-// récupération de tous les membres, utilisation de query -> correspond à url ?<data>
-app.get('/api/v1/members', (req, res) => {
-    if (req.query.max !== undefined) {
-        if (req.query.max > 0) {
-            res.json(success(members.slice(0, req.query.max)))
-            // slice renvoie une portion de l'array, entre indice et indice -1
-        } else if (req.query.max == 0) {
-            res.json(error("c'est pas possible de mettre 0"))
-            console.log(typeof (req.query.max));
+        if (typeof (index) == 'string') {
+            console.log('ici');
+            res.json(error(index));
         } else {
-            console.log('ici')
-            /*  arr.slice()
-                arr.slice(début)
-                   arr.slice(début, fin)*/
+            members.splice(index, 1);
+            res.json(success(members));
+
+        }
+    })
+
+
+    // récupère un membre avec son id
+    .get((req, res) => {
+
+        let index = getIndex(req.params.id, members);
+
+        if (typeof(index) == 'string') {
+            res.json(error(index));
+        } else {
+            res.json(success(members[index].name));
+        }
+    })
+
+    // modifie un membre avec son id
+    .put((req, res) => {
+        // recherche de l'index
+        let index = getIndex(req.params.id, members);
+        // si le retoru est de type string, l'index n'existe pas
+        if (typeof(index) == 'string') {
+            res.json(error(index));
+        } else {
+
+            let same = false
+
+            for (let item of members) {
+                if (req.body.name == item.name && req.params.id != item.id) {
+                    same = true;
+                    break
+                }
+
+                if (same) {
+                    res.json(error('same name'))
+                } else {
+                    members[index].name = req.body.name;
+                    res.json(success(true))
+                }
+            }
+        }
+
+    })
+
+MembersRouter.route('/')
+
+    // récupération de tous les membres
+    .get((req, res) => {
+        if (req.query.max !== undefined) {
+            if (req.query.max > 0) {
+                res.json(success(members.slice(0, req.query.max)))
+                // slice renvoie une portion de l'array, entre indice et indice -1
+            } else if (req.query.max == 0) {
+                res.json(error("c'est pas possible de mettre 0"))
+                console.log(typeof (req.query.max));
+            } else {
+                console.log('ici')
+                /*  arr.slice()
+                    arr.slice(début)
+                       arr.slice(début, fin)*/
+                res.json(success(members));
+            }
+        }
+        else {
+            console.log('la');
             res.json(success(members));
         }
     }
-    else {
-        console.log('la');
-        res.json(success(members));
-    }
-}
-)
+    )
 
-app.put('/api/v1/members/:id', (req, res) => {
-    // recherche de l'index
-    let index = getIndex(req.params.id, members);
-    // si le retoru est de type string, l'index n'existe pas
-    if (typeof(index) == 'string') {
-        res.json(error(index));
-    } else {
+    // Ajoute un membre
+    .post((req, res) => {
 
-        let same = false
-
-        for (let item of members) {
-            if (req.body.name == item.name && req.params.id != item.id) {
-                same = true;
-                break
-            }
-
-            if (same) {
-                res.json(error('same name'))
-            } else {
-                members[index].name = req.body.name;
-                res.json(success(true))
-            }
-        }
-    }
-
-})
-
-
-app.post('/api/v1/members', (req, res) => {
-
-    if (req.body.name) {
-
-        let sameName = false;
-        for (let item of members) {
-            if (req.body.name === item.name) {
-                sameName = true
-                break;
-            }
-        }
-
-        if (sameName) {
-            res.json(error('name already exists'))
-
-        } else {
-            let member =
-                {
-                    id: createID(),
-                    name: req.body.name
+        if (req.body.name) {
+            let sameName = false;
+            for (let item of members) {
+                if (req.body.name === item.name) {
+                    sameName = true
+                    break;
                 }
+            }
+            if (sameName) {
+                res.json(error('name already exists'))
 
-            members.push(member);
-            res.json(success(member));
+            } else {
+                let member =
+                    {
+                        id: createID(),
+                        name: req.body.name
+                    }
+                members.push(member);
+                res.json(success(member));
+            }}
+        else
+            {
+                res.json(error('no name value'))
+            }
 
-        }}
-    else
-        {
-            res.json(error('no name value'))
+    })
+
+
+PublicationsRouter.route("/:id")
+
+    // Récupère une publication avec son id
+    .get( (req, res) => {
+        let index = getIndex(req.params.id, members)
+
+        if (typeof(index) == 'string') {
+            res.json(error(index));
+        } else {
+            res.json(success(publication[index].title));
         }
+    })
 
-})
+
+PublicationsRouter.route('/')
+
+    // Récupère toutes les publications
+    .get((req, res)=> {
+        res.json(success(publication));
+    })
 
 
+
+
+
+app.use('/api/v1/members', MembersRouter)
+app.use('/api/v1/publications', PublicationsRouter)
 
 app.listen(8080, () => console.log('Started on port 8080')
 );
