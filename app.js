@@ -4,6 +4,7 @@ const bodyParser = require('body-parser')
 const {success, error, getIndex} = require('./functions')
 const e = require("express");
 const app = express()
+const config = require("./config")
 
 /*middleware : fonction qui va être lue au moment où il y a une requête,
 quelque soit cette requête, va s'exécuter avant tout le reste */
@@ -188,10 +189,10 @@ PublicationsRouter.route('/')
 
 
 
-app.use('/api/v1/members', MembersRouter)
-app.use('/api/v1/publications', PublicationsRouter)
+app.use(config.rootAPI +'members', MembersRouter)
+app.use(config.rootAPI + 'publications', PublicationsRouter)
 
-app.listen(8080, () => console.log('Started on port 8080')
+app.listen(config.port, () => console.log('Started on port' + config.port)
 );
 
 /*
